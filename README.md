@@ -46,9 +46,12 @@ DroidForge leverages Waydroid's native overlay architecture for trusted CA certi
 
 ## Included Helper Scripts
 
-- `scripts/cert-convert.sh`: Converts standard PEM certificates to Android `<subject_hash_old>.0` format and optionally installs to the Waydroid overlay.
+- `scripts/cert-convert.sh`: Converts standard PEM certificates to Android `<subject_hash_old>.0` format and installs to the Waydroid overlay.
 - `scripts/proxy-toggle.sh`: Controls Android global HTTP proxy settings via ADB.
 - `scripts/verify-env.sh`: Diagnostic tool verifying GPU render nodes, Waydroid container status, and ADB connectivity.
+- `scripts/capture-traffic.sh`: Captures raw `.pcap` packets on the `waydroid0` virtual bridge for Wireshark analysis.
+- `scripts/block-quic.sh`: Blocks outbound UDP port 443 to force mobile apps from HTTP/3 / QUIC to fallback to standard TCP / TLS.
+- `scripts/transparent-proxy.sh`: Configures host `iptables` PREROUTING rules to redirect all TCP ports 80/443 to mitmproxy transparent mode.
 
 ---
 
