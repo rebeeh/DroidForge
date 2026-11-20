@@ -12,6 +12,7 @@ A reproducible research and engineering environment for running, debugging, and 
 - **ARM Translation**: Libhoudini (x86_64 to ARM / ARM64 execution layer)
 - **Helper Utilities**: [Waydroid Helper](https://github.com/waydroid-helper) (`waydroid-helper` / `waydroid-cli` / `waydroid_script`)
 - **Traffic Interception**: [mitmproxy](https://mitmproxy.org/) with native system overlay CA certificates
+- **Runtime Instrumentation**: [Frida](https://frida.re/) for in-process network call tracing
 - **Input Mapping**: Integrated Waydroid Helper keymapper & [Phantom](https://github.com/frostasm/phantom)
 
 ---
@@ -41,6 +42,7 @@ DroidForge leverages Waydroid's native overlay architecture for trusted CA certi
 - [03 - Network Traffic Inspection & CA Certificates](docs/03-network-inspection.md)
 - [04 - Input Mapping & Graphics Acceleration](docs/04-input-mapping.md)
 - [05 - Advanced Network Analysis & Troubleshooting](docs/05-advanced-network-analysis.md)
+- [06 - Runtime Traffic Analysis with Frida](docs/06-runtime-traffic-analysis-frida.md)
 
 ---
 
@@ -52,6 +54,7 @@ DroidForge leverages Waydroid's native overlay architecture for trusted CA certi
 - `scripts/capture-traffic.sh`: Captures raw `.pcap` packets on the `waydroid0` virtual bridge for Wireshark analysis.
 - `scripts/block-quic.sh`: Blocks outbound UDP port 443 to force mobile apps from HTTP/3 / QUIC to fallback to standard TCP / TLS.
 - `scripts/transparent-proxy.sh`: Configures host `iptables` PREROUTING rules to redirect all TCP ports 80/443 to mitmproxy transparent mode.
+- `scripts/setup-frida-server.sh`: Auto-detects container architecture, fetches, pushes, and launches `frida-server` inside Waydroid.
 
 ---
 
