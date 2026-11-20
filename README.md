@@ -21,7 +21,6 @@
 - [🔒 Native Certificate Injection](#-native-system-certificate-injection)
 - [📚 Documentation Index](#-documentation-index)
 - [🧰 Included Helper Scripts](#-included-helper-scripts)
-- [🏷️ Repository Metadata & Tags](#️-repository-metadata--tags)
 - [📄 License](#-license)
 
 ---
@@ -85,19 +84,6 @@ All scripts are located in the [`scripts/`](scripts/) directory and are pre-conf
 | [`scripts/block-quic.sh`](scripts/block-quic.sh) | Blocks outbound UDP 443 to force apps from QUIC/HTTP/3 to fall back to TCP |
 | [`scripts/transparent-proxy.sh`](scripts/transparent-proxy.sh) | Configures host `iptables` PREROUTING rules for apps bypassing system proxy |
 | [`scripts/setup-frida-server.sh`](scripts/setup-frida-server.sh) | Auto-detects container ABI, downloads, pushes, and launches `frida-server` |
-
----
-
-## 🏷️ Repository Metadata & Tags
-
-For configuring the GitHub repository settings (About section):
-
-* **Description**: Reproducible research environment for running, debugging, and testing Android apps on Linux with GPU acceleration, ARM translation, and network inspection.
-* **Website**: `https://github.com/rebeeh/DroidForge#readme`
-* **Suggested Topics / Tags**:
-  ```text
-  waydroid, android, linux, libhoudini, arm-translation, mitmproxy, frida, network-analysis, mesa-dri, lxc
-  ```
 
 ---
 
