@@ -12,6 +12,14 @@ To run Android applications compiled exclusively for ARM architectures (`arm64-v
 
 This guide details configuring **Libhoudini** using the recommended [Waydroid Helper](https://github.com/waydroid-helper) automated tooling.
 
+## 📑 Table of Contents
+1. [How Libhoudini Translation Works](#1-how-libhoudini-translation-works)
+2. [Why Use Waydroid Helper?](#2-why-use-waydroid-helper)
+3. [Installation Methods](#3-installation-methods)
+   - [Method A: Universal CLI Script](#method-a-universal-cli-script-recommended)
+   - [Method B: Native GTK GUI](#method-b-native-gtk-gui)
+4. [Verifying Translation Support](#4-verifying-translation-support)
+
 ---
 
 ## 1. How Libhoudini Translation Works
