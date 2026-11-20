@@ -5,13 +5,24 @@
 </p>
 
 <p align="center">
-  <a href="#technical-stack"><img src="https://img.shields.io/badge/Platform-Linux-blue?logo=linux" alt="Platform"></a>
-  <a href="#technical-stack"><img src="https://img.shields.io/badge/Container-Waydroid-success?logo=android" alt="Waydroid"></a>
-  <a href="#technical-stack"><img src="https://img.shields.io/badge/Graphics-Mesa%20DRI-orange" alt="Mesa DRI"></a>
-  <a href="#technical-stack"><img src="https://img.shields.io/badge/ARM%20Translation-Libhoudini-brightgreen" alt="Libhoudini"></a>
-  <a href="#technical-stack"><img src="https://img.shields.io/badge/Inspection-mitmproxy%20%7C%20Frida-red" alt="Inspection"></a>
+  <a href="#-technical-stack"><img src="https://img.shields.io/badge/Platform-Linux-blue?logo=linux" alt="Platform"></a>
+  <a href="#-technical-stack"><img src="https://img.shields.io/badge/Container-Waydroid-success?logo=android" alt="Waydroid"></a>
+  <a href="#-technical-stack"><img src="https://img.shields.io/badge/Graphics-Mesa%20DRI-orange" alt="Mesa DRI"></a>
+  <a href="#-technical-stack"><img src="https://img.shields.io/badge/ARM%20Translation-Libhoudini-brightgreen" alt="Libhoudini"></a>
+  <a href="#-technical-stack"><img src="https://img.shields.io/badge/Inspection-mitmproxy%20%7C%20Frida-red" alt="Inspection"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-purple" alt="License"></a>
 </p>
+
+---
+
+## 📑 Quick Navigation
+- [🔬 Technical Stack](#-technical-stack)
+- [🚀 Why Waydroid Helper?](#-why-waydroid-helper)
+- [🔒 Native Certificate Injection](#-native-system-certificate-injection)
+- [📚 Documentation Index](#-documentation-index)
+- [🧰 Included Helper Scripts](#-included-helper-scripts)
+- [🏷️ Repository Metadata & Tags](#️-repository-metadata--tags)
+- [📄 License](#-license)
 
 ---
 
@@ -63,7 +74,7 @@ DroidForge leverages Waydroid's native overlay architecture for trusted CA certi
 
 ## 🧰 Included Helper Scripts
 
-All scripts are located in the [`scripts/`](scripts/) directory and are pre-configured:
+All scripts are located in the [`scripts/`](scripts/) directory and are pre-configured with executable permissions:
 
 | Script | Purpose |
 | :--- | :--- |
@@ -74,6 +85,19 @@ All scripts are located in the [`scripts/`](scripts/) directory and are pre-conf
 | [`scripts/block-quic.sh`](scripts/block-quic.sh) | Blocks outbound UDP 443 to force apps from QUIC/HTTP/3 to fall back to TCP |
 | [`scripts/transparent-proxy.sh`](scripts/transparent-proxy.sh) | Configures host `iptables` PREROUTING rules for apps bypassing system proxy |
 | [`scripts/setup-frida-server.sh`](scripts/setup-frida-server.sh) | Auto-detects container ABI, downloads, pushes, and launches `frida-server` |
+
+---
+
+## 🏷️ Repository Metadata & Tags
+
+For configuring the GitHub repository settings (About section):
+
+* **Description**: Reproducible research environment for running, debugging, and testing Android apps on Linux with GPU acceleration, ARM translation, and network inspection.
+* **Website**: `https://github.com/rebeeh/DroidForge#readme`
+* **Suggested Topics / Tags**:
+  ```text
+  waydroid, android, linux, libhoudini, arm-translation, mitmproxy, frida, network-analysis, mesa-dri, lxc
+  ```
 
 ---
 
