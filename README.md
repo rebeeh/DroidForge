@@ -41,6 +41,7 @@ DroidForge leverages Waydroid's native overlay architecture for trusted CA certi
 - [02 - ARM Translation with Waydroid Helper](docs/02-arm-translation.md)
 - [03 - Network Traffic Inspection & CA Certificates](docs/03-network-inspection.md)
 - [04 - Input Mapping & Intel GPU Acceleration](docs/04-input-mapping.md)
+- [05 - Advanced Network Analysis & Troubleshooting](docs/05-advanced-network-analysis.md)
 
 ---
 
