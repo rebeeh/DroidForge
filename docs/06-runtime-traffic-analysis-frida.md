@@ -1,5 +1,12 @@
 # Runtime Traffic Analysis with Frida
 
+<p align="center">
+  <a href="05-advanced-network-analysis.md">← Previous: Advanced Network Analysis</a> •
+  <a href="../README.md">📚 Documentation Index</a>
+</p>
+
+---
+
 When network interception fails due to custom networking stacks, binary serialization, or strict certificate validation, **dynamic runtime instrumentation** with [Frida](https://frida.re/) allows inspecting network activity directly from process memory.
 
 ---
@@ -9,26 +16,29 @@ When network interception fails due to custom networking stacks, binary serializ
 Standard network proxies sit on the wire between the client and server. If the application rejects the proxy's TLS certificate or uses direct raw sockets, the proxy cannot display plaintext traffic.
 
 Frida operates inside the application's process space:
-- **Pre-Encryption Inspection**: Captures HTTP requests, URLs, and headers before TLS encryption takes place.
-- **Post-Decryption Inspection**: Reads response bodies immediately after decryption.
-- **Protocol Agnostic**: Intercepts data regardless of whether the underlying transport uses TCP, UDP, or QUIC.
+* **Pre-Encryption Inspection**: Captures HTTP requests, URLs, and headers before TLS encryption takes place.
+* **Post-Decryption Inspection**: Reads response bodies immediately after decryption.
+* **Protocol Agnostic**: Intercepts data regardless of whether the underlying transport uses TCP, UDP, or QUIC.
 
-```text
-+-------------------------------------------------------------------------+
-|                        Application Process Space                        |
-|                                                                         |
-|  [ Business Logic ]                                                     |
-|          |                                                              |
-|          v                                                              |
-|  [ Network API ] ------> [ Frida Hook ] ===> Logs: URLs, Headers, Body  |
-|  (OkHttp / HttpURLConnection)                                           |
-|          |                                                              |
-|          v                                                              |
-|  [ TLS Engine ] (Encryption occurs here)                                |
-|          |                                                              |
-|          v                                                              |
-|  [ Raw Sockets ] (Encrypted wire bytes sent to network interface)       |
-+-------------------------------------------------------------------------+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant App as Application Logic
+    participant Frida as Frida Interceptor Hook
+    participant Net as Network Engine (OkHttp / Cronet)
+    participant TLS as TLS Engine (BoringSSL / Fizz)
+    participant Server as Remote Server
+
+    App->>Frida: Calls execute(Request)
+    Note over Frida: Logs plaintext URL,<br/>Method, & Headers
+    Frida->>Net: Forwards call
+    Net->>TLS: Encrypt payload
+    TLS->>Server: Transmits encrypted wire bytes
+    Server-->>TLS: Returns encrypted wire bytes
+    TLS-->>Net: Decrypts payload
+    Net-->>Frida: Returns Response
+    Note over Frida: Logs response status<br/>& payload body
+    Frida-->>App: Delivers Response
 ```
 
 ---
@@ -41,41 +51,27 @@ python3 -m pip install --upgrade frida frida-tools
 ```
 
 ### Step 2: Push and Launch frida-server in Waydroid
-Use the included DroidForge helper script:
+Use the included automated deployer script:
 ```bash
 ./scripts/setup-frida-server.sh
 ```
 
-Or manually:
-1. Identify the container architecture:
-   ```bash
-   adb shell getprop ro.product.cpu.abi
-   # e.g., arm64-v8a or x86_64
-   ```
-2. Download the matching `frida-server-*-android-<arch>.xz` release from [Frida GitHub Releases](https://github.com/frida/frida/releases).
-3. Extract and push to the container:
-   ```bash
-   unxz frida-server-*-android-*.xz
-   adb push frida-server-* /data/local/tmp/frida-server
-   adb shell chmod 755 /data/local/tmp/frida-server
-   ```
-4. Run the daemon inside the container:
-   ```bash
-   adb shell "nohup /data/local/tmp/frida-server >/dev/null 2>&1 &"
-   ```
+> [!NOTE]
+> The [`setup-frida-server.sh`](../scripts/setup-frida-server.sh) script automatically detects whether your container runs on `arm64`, `x86_64`, `arm`, or `x86`, fetches the corresponding release, pushes it to `/data/local/tmp/frida-server`, and starts the background daemon.
 
-### Step 3: Verify the Connection
-From your host, list active processes in Waydroid:
+### Step 3: Verify Connection from Host
+From your host terminal, query the process list:
 ```bash
 frida-ps -U
 ```
+If active, you will see a list of Android packages and PIDs running inside Waydroid.
 
 ---
 
 ## 3. Tracing Network Calls (Example Scripts)
 
 ### A. Tracing Java `HttpURLConnection`
-To log all outbound HTTP/HTTPS connections created through standard Java APIs, attach the following JavaScript hook:
+Log all outbound connections created through standard Java networking:
 
 ```javascript
 // trace_http.js
@@ -106,7 +102,7 @@ frida -U -f <package.name> -l trace_http.js
 ---
 
 ### B. Tracing OkHttp3 Requests
-Many modern Android applications use [OkHttp](https://square.github.io/okhttp/) as their underlying client. You can log requests and headers by hooking `RealCall`:
+Many modern Android applications use [OkHttp](https://square.github.io/okhttp/) as their underlying client. Log requests and headers by hooking `RealCall`:
 
 ```javascript
 // trace_okhttp.js
@@ -152,10 +148,17 @@ Interceptor.attach(Module.findExportByName("libc.so", "connect"), {
 
 ---
 
-## 4. Summary Matrix
+## 4. Multi-Layer Tooling Comparison
 
 | Analysis Goal | Tool / Technique | Observability Level |
 | :--- | :--- | :--- |
 | **Discovering Hostnames & Ports** | `scripts/capture-traffic.sh` (tcpdump) | Transport wire level |
 | **Unencrypted HTTP/HTTPS Inspection** | `mitmproxy` + System CA Overlay | Network proxy level |
 | **Bypassed / Native Networking Analysis** | `frida` Java & Libc Socket hooks | In-process runtime level |
+
+---
+
+<p align="center">
+  <a href="05-advanced-network-analysis.md">← Previous: 05 - Advanced Network Analysis & Troubleshooting</a> •
+  <a href="../README.md">📚 Documentation Index</a>
+</p>
