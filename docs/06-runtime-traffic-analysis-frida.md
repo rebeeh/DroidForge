@@ -9,6 +9,18 @@
 
 When network interception fails due to custom networking stacks, binary serialization, or strict certificate validation, **dynamic runtime instrumentation** with [Frida](https://frida.re/) allows inspecting network activity directly from process memory.
 
+## 📑 Table of Contents
+1. [Why Use Frida for Network Analysis?](#1-why-use-frida-for-network-analysis)
+2. [Deploying frida-server on Waydroid](#2-deploying-frida-server-on-waydroid)
+   - [Step 1: Install Frida Tools on Linux Host](#step-1-install-frida-tools-on-linux-host)
+   - [Step 2: Push and Launch frida-server in Waydroid](#step-2-push-and-launch-frida-server-in-waydroid)
+   - [Step 3: Verify Connection from Host](#step-3-verify-connection-from-host)
+3. [Tracing Network Calls](#3-tracing-network-calls-example-scripts)
+   - [A. Tracing Java HttpURLConnection](#a-tracing-java-httpurlconnection)
+   - [B. Tracing OkHttp3 Requests](#b-tracing-okhttp3-requests)
+   - [C. Tracing Low-Level Socket Destinations](#c-tracing-low-level-socket-destinations)
+4. [Multi-Layer Tooling Comparison](#4-multi-layer-tooling-comparison)
+
 ---
 
 ## 1. Why Use Frida for Network Analysis?
