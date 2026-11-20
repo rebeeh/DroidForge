@@ -1,0 +1,43 @@
+name: Application Compatibility Report
+description: Report whether an Android application functions under Waydroid + Libhoudini
+title: "[Compat]: <Application Name>"
+labels: ["compatibility", "research"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for contributing to DroidForge's application compatibility research!
+  - type: input
+    id: app-name
+    attributes:
+      label: Application Name & Version
+      placeholder: "e.g. Spotify v8.9.12"
+    validations:
+      required: true
+  - type: dropdown
+    id: abi-type
+    attributes:
+      label: Target ABI Architecture
+      options:
+        - "arm64-v8a (ARM 64-bit)"
+        - "armeabi-v7a (ARM 32-bit)"
+        - "x86_64 (Native x86_64)"
+        - "Unknown"
+    validations:
+      required: true
+  - type: dropdown
+    id: status
+    attributes:
+      label: Compatibility Status
+      options:
+        - "Working Flawlessly"
+        - "Working with Minor Glitches"
+        - "Starts but Crashes during Use"
+        - "Crashes on Launch"
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Observations & Logs
+      description: Include relevant logcat output (`adb logcat -d`) or graphic/sound notes.
