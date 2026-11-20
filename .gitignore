@@ -1,0 +1,33 @@
+# Python virtual environments & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env/
+
+# Network captures & traffic dumps
+*.pcap
+*.pcapng
+*.cap
+
+# Generated certificates & sensitive keys
+*.0
+*.pem
+*.cer
+*.crt
+*.key
+mitmproxy-ca*
+
+# System & Editor artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Waydroid & container runtime logs
+*.log
