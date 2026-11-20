@@ -6,12 +6,12 @@ echo "          DroidForge Environment Diagnostic Verifier       "
 echo "=========================================================="
 
 echo -n "[*] Host OS: "
-[ -f /etc/os-release ] && . /etc/os-release && echo "${PRETTY_NAME}" || echo "Unknown"
+[ -f /etc/os-release ] && . /etc/os-release && echo "${PRETTY_NAME}" || echo "Unknown Linux Distribution"
 
-echo -n "[*] Compositor: "
-echo "${XDG_CURRENT_DESKTOP:-unknown} (${WAYLAND_DISPLAY:-none})"
+echo -n "[*] Display Session: "
+echo "${XDG_SESSION_TYPE:-unknown} (${WAYLAND_DISPLAY:-${DISPLAY:-none}})"
 
-echo -n "[*] Intel Render Node (/dev/dri/renderD128): "
+echo -n "[*] Graphics Render Node (/dev/dri/renderD128): "
 [ -e "/dev/dri/renderD128" ] && echo "FOUND" || echo "MISSING"
 
 echo -n "[*] Waydroid service: "
