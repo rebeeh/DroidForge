@@ -10,6 +10,15 @@
 
 This guide details configuring [mitmproxy](https://mitmproxy.org/) to intercept and inspect HTTPS network traffic from applications running inside Waydroid.
 
+## 📑 Table of Contents
+1. [Native Overlay Architecture](#1-native-overlay-architecture-no-root-modules-required)
+2. [Certificate Installation Workflow](#2-certificate-installation-workflow)
+   - [Step 1: Start mitmproxy to Generate Certificate](#step-1-start-mitmproxy-to-generate-certificate)
+   - [Step 2: Convert and Install Certificate](#step-2-convert-and-install-certificate)
+   - [Step 3: Restart Waydroid Container](#step-3-restart-waydroid-container)
+3. [Directing Android Traffic to mitmproxy](#3-directing-android-traffic-to-mitmproxy)
+4. [Troubleshooting & Next Steps](#4-troubleshooting--next-steps)
+
 ---
 
 ## 1. Native Overlay Architecture (No Root Modules Required)
@@ -99,7 +108,7 @@ Android container traffic can be directed through the host proxy using the [`scr
 
 ---
 
-## 4. Next Steps
+## 4. Troubleshooting & Next Steps
 
 If certain applications do not display traffic or fail with TLS alerts, continue to:
 * [05 - Advanced Network Analysis & Troubleshooting](05-advanced-network-analysis.md) (Covering QUIC blocking and transparent proxying)
