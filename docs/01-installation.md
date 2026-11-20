@@ -9,6 +9,17 @@
 
 This guide walks through deploying [Waydroid](https://waydro.id/) on modern Linux distributions to establish an isolated Android container environment.
 
+## 📑 Table of Contents
+1. [System Prerequisites](#1-system-prerequisites)
+2. [Package Installation](#2-package-installation)
+   - [Fedora / RHEL](#fedora--rhel)
+   - [Ubuntu / Debian](#ubuntu--debian)
+   - [Arch Linux](#arch-linux)
+   - [openSUSE](#opensuse)
+3. [Initializing the Android Image](#3-initializing-the-android-image)
+4. [Starting the Container Service](#4-starting-the-container-service)
+5. [Diagnostics & Verification](#5-diagnostics--verification)
+
 ---
 
 ## 1. System Prerequisites
@@ -92,10 +103,20 @@ Waydroid relies on a system daemon managing container network namespaces and mou
    waydroid show-full-ui
    ```
 
+---
+
+## 5. Diagnostics & Verification
+
+To verify that the container service and graphics nodes are correctly detected, run the included DroidForge diagnostic tool:
+
+```bash
+./scripts/verify-env.sh
+```
+
 > [!IMPORTANT]
-> To verify that the container service and graphics nodes are correctly detected, run the environment diagnostic tool:
+> If the script reports that the graphics render node is missing, ensure your user belongs to the `video` and `render` groups:
 > ```bash
-> ./scripts/verify-env.sh
+> sudo usermod -aG video,render $USER
 > ```
 
 ---
