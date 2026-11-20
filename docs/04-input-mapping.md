@@ -10,6 +10,13 @@
 
 This guide covers configuring Linux Direct Rendering Infrastructure (DRI) graphics acceleration and translating desktop mouse/keyboard inputs into virtual multi-touch events for Android applications.
 
+## 📑 Table of Contents
+1. [Hardware Graphics Acceleration with Mesa](#1-hardware-graphics-acceleration-with-mesa)
+   - [Verifying GPU Acceleration](#verifying-gpu-acceleration)
+2. [Desktop Input Mapping](#2-desktop-input-mapping)
+   - [Integrated Keymapping with Waydroid Helper](#integrated-keymapping-with-waydroid-helper)
+3. [Alternative Universal Input Mapping](#3-alternative-universal-input-mapping)
+
 ---
 
 ## 1. Hardware Graphics Acceleration with Mesa
