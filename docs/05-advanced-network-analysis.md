@@ -12,6 +12,18 @@ When intercepting network traffic from modern mobile applications on Waydroid, s
 
 This guide details the network architecture hurdles that cause traffic to bypass or fail in [mitmproxy](https://mitmproxy.org/), and provides a systematic diagnostic workflow.
 
+## 📑 Table of Contents
+1. [Why Standard Proxies Fail on Modern Apps](#1-why-standard-proxies-fail-on-modern-apps)
+   - [Barrier A: Advisory Proxy Settings](#barrier-a-advisory-proxy-settings)
+   - [Barrier B: QUIC / HTTP/3 over UDP 443](#barrier-b-quic--http3-over-udp-443)
+   - [Barrier C: Custom Certificate Pinning](#barrier-c-custom-certificate-pinning)
+2. [Step-by-Step Diagnostic Workflow](#2-step-by-step-diagnostic-workflow)
+   - [Step 1: Raw Packet Capture on Host (waydroid0)](#step-1-raw-packet-capture-on-host-waydroid0)
+   - [Step 2: Forcing QUIC Fallback to TCP](#step-2-forcing-quic-fallback-to-tcp)
+   - [Step 3: Transparent Proxy Redirection (iptables)](#step-3-transparent-proxy-redirection-iptables)
+   - [Step 4: Distinguishing Pinning from Network Errors](#step-4-distinguishing-pinning-from-network-errors)
+3. [Next Steps](#3-next-steps)
+
 ---
 
 ## 1. Why Standard Proxies Fail on Modern Apps
@@ -112,6 +124,12 @@ Once traffic is reaching mitmproxy:
 2. **When Pinning is Enforced**:
    * For applications with strict certificate pinning, standard network proxying alone cannot decrypt traffic.
    * Proceed to [06 - Runtime Traffic Analysis with Frida](06-runtime-traffic-analysis-frida.md) to inspect API calls in process memory before encryption occurs.
+
+---
+
+## 3. Next Steps
+
+* [06 - Runtime Traffic Analysis with Frida](06-runtime-traffic-analysis-frida.md): Hook in-memory Java and native socket calls to observe traffic when encryption cannot be broken on the wire.
 
 ---
 
