@@ -1,5 +1,13 @@
 # Advanced Network Analysis & Troubleshooting
 
+<p align="center">
+  <a href="04-input-mapping.md">← Previous: Input Mapping & GPU</a> •
+  <a href="../README.md">📚 Documentation Index</a> •
+  <a href="06-runtime-traffic-analysis-frida.md">Next: Runtime Analysis with Frida →</a>
+</p>
+
+---
+
 When intercepting network traffic from modern mobile applications on Waydroid, standard HTTP proxy configurations often fail to display readable requests. 
 
 This guide details the network architecture hurdles that cause traffic to bypass or fail in [mitmproxy](https://mitmproxy.org/), and provides a systematic diagnostic workflow.
@@ -10,32 +18,27 @@ This guide details the network architecture hurdles that cause traffic to bypass
 
 Unlike web browsers, complex mobile applications do not rely solely on Android's standard Java networking stack. Three primary barriers prevent standard proxy interception:
 
-```text
-+-------------------------------------------------------------------+
-|                     Mobile Application Layer                     |
-|                                                                   |
-|   [ Browser / WebView ]              [ Native C++ Engine ]        |
-|     (Java HttpUrlConn)                 (Cronet / Tigon / Custom)  |
-|            |                                    |                 |
-|   Respects http_proxy                 Bypasses http_proxy         |
-|            |                                    |                 |
-|   TCP / TLS (Port 443)                 QUIC / UDP (Port 443)      |
-+------------|------------------------------------|-----------------+
-             |                                    |
-             v                                    v
-     [ mitmproxy (TCP) ]                  [ Direct to Gateway ]
-   (Handshake or Pinning Fail)            (Completely Invisible)
+```mermaid
+flowchart TD
+    App["Mobile Application Layer"] --> Split{"Networking Implementation"}
+    Split -->|"Java HttpURLConnection / WebView"| JavaStack["Advisory http_proxy Respected"]
+    Split -->|"Native C++ Engine (Cronet / Tigon)"| NativeStack["Bypasses http_proxy via Raw Sockets"]
+    
+    JavaStack --> ProxyCheck{"Protocol & Certificate"}
+    NativeStack --> QUICCheck{"Protocol Type"}
+    
+    ProxyCheck -->|"Standard TLS + Trusted CA"| MitmSuccess["Decrypted in mitmproxy"]
+    ProxyCheck -->|"Certificate Pinning Enforced"| TLSFail["Handshake Termination (Error: certificate_unknown)"]
+    
+    QUICCheck -->|"HTTP/3 over UDP 443"| DirectInternet["Direct to Host Gateway (Invisible to TCP Proxy)"]
+    QUICCheck -->|"TCP 443 Direct"| DirectTCP["Direct Outbound TCP (Bypasses Proxy Port)"]
 ```
 
 ### Barrier A: Advisory Proxy Settings
-Setting Android's global proxy via:
-```bash
-adb shell settings put global http_proxy 192.168.240.1:8080
-```
-is **advisory**. While standard WebViews and basic Java `HttpURLConnection` consumers adhere to it, native C/C++ networking runtimes (such as Chromium Cronet, Meta Tigon, or Flutter's Dart VM) create raw POSIX sockets directly to destination IPs, completely ignoring the Android proxy configuration.
+Setting Android's global proxy via `adb shell settings put global http_proxy ...` is **advisory**. While standard WebViews and basic Java `HttpURLConnection` consumers adhere to it, native C/C++ networking runtimes (such as Chromium Cronet, Meta Tigon, or Flutter's Dart VM) create raw POSIX sockets directly to destination IPs, completely ignoring the Android proxy configuration.
 
 ### Barrier B: QUIC / HTTP/3 over UDP 443
-Modern applications preferentially establish connections using QUIC (HTTP/3) over UDP port 443.
+Modern applications preferentially establish connections using QUIC (HTTP/3) over UDP port 443:
 - Standard HTTP/HTTPS proxies only listen for TCP connections.
 - UDP traffic completely bypasses the proxy and routes directly out of the `waydroid0` virtual bridge interface to the internet.
 
@@ -52,11 +55,8 @@ To identify exactly which barrier is affecting your environment, diagnose the la
 Before looking at proxy logs, capture raw packets on the host bridge interface to confirm where traffic is flowing:
 
 ```bash
-# Verify the interface name on Fedora host
-ip -br addr show waydroid0
-
-# Capture raw packets to a PCAP file
-sudo tcpdump -i waydroid0 -nn -w waydroid_traffic.pcap
+# Run the automated packet capture utility
+./scripts/capture-traffic.sh waydroid0 waydroid_traffic.pcap
 ```
 
 Open `waydroid_traffic.pcap` in [Wireshark](https://www.wireshark.org/) and apply the following display filters:
@@ -74,28 +74,31 @@ Open `waydroid_traffic.pcap` in [Wireshark](https://www.wireshark.org/) and appl
 If the application sends UDP port 443 packets, block outbound UDP 443 on the host so the application's networking stack falls back to standard TCP:
 
 ```bash
-# Drop outbound UDP 443 on the Waydroid bridge
-sudo iptables -I FORWARD -i waydroid0 -p udp --dport 443 -j DROP
+# Drop outbound UDP 443 using the helper script
+./scripts/block-quic.sh enable
+
+# Check rule status
+./scripts/block-quic.sh status
 ```
 
-With UDP blocked, RFC-compliant networking libraries fall back to TCP, allowing interception tools to see the connection.
+> [!NOTE]
+> With UDP 443 blocked, RFC-compliant networking libraries fall back to TCP, allowing interception tools to see the connection.
 
 ---
 
 ### Step 3: Transparent Proxy Redirection (iptables)
-If the application bypasses the advisory proxy setting and connects directly to external IP addresses over TCP 443, configure transparent redirection on the Fedora host:
+If the application bypasses the advisory proxy setting and connects directly to external IP addresses over TCP 443, configure transparent redirection on the Linux host:
 
 ```bash
-# 1. Enable IP forwarding on host
-sudo sysctl -w net.ipv4.ip_forward=1
+# Enable transparent redirection of TCP ports 80 and 443 to port 8080
+./scripts/transparent-proxy.sh enable 8080
 
-# 2. Redirect outbound TCP 80 and 443 from waydroid0 to mitmproxy
-sudo iptables -t nat -A PREROUTING -i waydroid0 -p tcp --dport 80 -j REDIRECT --to-port 8080
-sudo iptables -t nat -A PREROUTING -i waydroid0 -p tcp --dport 443 -j REDIRECT --to-port 8080
-
-# 3. Start mitmproxy in transparent mode
+# Start mitmproxy in transparent mode
 mitmweb --mode transparent --listen-port 8080 --listen-host 0.0.0.0
 ```
+
+> [!IMPORTANT]
+> When transparent proxying is active, do not configure Android's `http_proxy`. The host kernel intercepts packets at the network layer transparently.
 
 ---
 
@@ -103,21 +106,17 @@ mitmweb --mode transparent --listen-port 8080 --listen-host 0.0.0.0
 Once traffic is reaching mitmproxy:
 
 1. **Check mitmproxy Event Log**:
-   - If you see `Client TLS handshake failed: Certificate verification failed`, traffic is being successfully routed to the proxy, but the application is enforcing **certificate pinning**.
-   - If requests load with HTTP 200/300 responses, the system CA is accepted.
+   * If you see `Client TLS handshake failed: Certificate verification failed`, traffic is being successfully routed to the proxy, but the application is enforcing **certificate pinning**.
+   * If requests load with HTTP 200/300 responses, the system CA is accepted.
 
-2. **Application Analysis**:
-   - For applications with strict certificate pinning, standard proxy interception alone is insufficient. Observing application behavior requires either:
-     - Application-layer network inspection via [PCAPdroid](https://github.com/emanuele-f/PCAPdroid).
-     - Dynamic binary instrumentation (such as [Frida](https://frida.re/)) to observe unencrypted buffers or hook the TLS verification functions in a dedicated test environment.
+2. **When Pinning is Enforced**:
+   * For applications with strict certificate pinning, standard network proxying alone cannot decrypt traffic.
+   * Proceed to [06 - Runtime Traffic Analysis with Frida](06-runtime-traffic-analysis-frida.md) to inspect API calls in process memory before encryption occurs.
 
 ---
 
-## 3. Alternative Tooling Matrix
-
-| Tool | Operating Level | Decrypts Pinning? | Primary Use Case |
-| :--- | :--- | :--- | :--- |
-| **tcpdump / Wireshark** | Network / Transport Layer | No | Packet-level flow analysis, discovering destination IPs, protocols (TCP/UDP), and SNIs. |
-| **PCAPdroid** | Android VpnService Layer | No (unless integrated with unpinned mitm) | Per-application connection metadata, bandwidth measurement, and QUIC detection. |
-| **mitmproxy** | Application / HTTP Layer | Requires CA trust (fails on pinned apps) | Full request/response body analysis and modification on unpinned traffic. |
-| **Frida** | Process Memory / Runtime Layer | Yes (via function hooks) | Inspecting function arguments, tracing custom network engines, and security research. |
+<p align="center">
+  <a href="04-input-mapping.md">← Previous: Input Mapping & GPU</a> •
+  <a href="../README.md">📚 Documentation Index</a> •
+  <a href="06-runtime-traffic-analysis-frida.md">Next: 06 - Runtime Traffic Analysis with Frida →</a>
+</p>
